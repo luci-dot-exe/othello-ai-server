@@ -4,9 +4,11 @@ import { authenticateJWT } from "./middlewares/authenticateJWT";
 import { corsMiddleware } from "./middlewares/corsMiddleware";
 import { postRegister } from "./routes/postRegister";
 import { users } from "./database";
+import { postMatchMaking } from "./routes/postMatchMaking";
+import { getMatchMaking } from "./routes/getMatchMaking";
 require("dotenv").config();
 
-const SERVER_PORT = 3000;
+const SERVER_PORT = 3001;
 
 if (process.env.JWT_SECRET === undefined) {
   console.log("JWT_SECRET NOT FOUND!");
@@ -20,7 +22,6 @@ async function startServer() {
 
   app.use(corsMiddleware);
   app.use(bodyParser.json());
-  app.set("port", SERVER_PORT);
 
   app.post("/register", postRegister);
 
@@ -30,9 +31,10 @@ async function startServer() {
     );
   });
 
-  app.listen(app.get("port"), () => {
-    console.log(`Server on port ${app.get("port")}`);
-  });
+  app.post("/matchmaking", authenticateJWT, postMatchMaking);
+  app.get("/matchmaking", authenticateJWT, getMatchMaking);
+
+  app.listen(SERVER_PORT);
 }
 
 startServer();

@@ -7,3 +7,7 @@ export function badRequest(response: Response, message: string) {
 export function unauthorized(response: Response, message: string) {
   return response.status(401).json({ message });
 }
+
+export function internalServerError(response: Response, message: string) {
+  return response.status(500).json({ message });
+}
