@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import { authenticateJWT } from "./middlewares/authenticateJWT";
 import { corsMiddleware } from "./middlewares/corsMiddleware";
 import { postRegister } from "./routes/postRegister";
+import { users } from "./database";
 require("dotenv").config();
 
 const SERVER_PORT = 3000;
@@ -24,7 +25,9 @@ async function startServer() {
   app.post("/register", postRegister);
 
   app.get("/test-authentication", authenticateJWT, (request, response) => {
-    return response.json(request.body);
+    return response.json(
+      users.find((user) => user.userId === request.body.userId)
+    );
   });
 
   app.listen(app.get("port"), () => {
