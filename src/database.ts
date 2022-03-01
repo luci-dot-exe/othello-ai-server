@@ -1,4 +1,4 @@
-import { Action } from "./routes/postMatchAction";
+import { Action, DisputeReason, MatchResult } from "./routes/postMatchAction";
 
 type User = { userId: string; username: string };
 export const users: User[] = [];
@@ -29,6 +29,14 @@ type Match = {
   | ({ player1Id: string; player2Id: string } & (
       | { phase: "PLAYER_1_TURN"; onPlayer1Action: (action: Action) => void }
       | { phase: "PLAYER_2_TURN"; onPlayer2Action: (action: Action) => void }
+      | { phase: "DISPUTE"; reason: DisputeReason }
+      | {
+          phase:
+            | "WAITING_FOR_CONSENSUS_OF_PLAYER_1"
+            | "WAITING_FOR_CONSENSUS_OF_PLAYER_2"
+            | "GAME_OVER";
+          result: MatchResult;
+        }
     ))
 );
 
