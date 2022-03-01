@@ -8,7 +8,7 @@ import { postMatchMaking } from "./routes/postMatchMaking";
 import { getMatchMaking } from "./routes/getMatchMaking";
 import { postMatchAction } from "./routes/postMatchAction";
 
-export async function startServer(jwtSecret: string, port: number) {
+export function startServer(jwtSecret: string, port: number) {
   const app: Application = express();
 
   app.use(corsMiddleware);
@@ -39,5 +39,7 @@ export async function startServer(jwtSecret: string, port: number) {
     postMatchAction
   );
 
-  app.listen(port);
+  const server = app.listen(port);
+
+  return server;
 }
