@@ -6,7 +6,7 @@ if (process.env.JWT_SECRET === undefined) {
   process.exit();
 }
 
-export const { JWT_SECRET } = process.env;
-const SERVER_PORT = 3001;
+const { JWT_SECRET } = process.env;
 
-startServer(SERVER_PORT);
+const SERVER_PORT = 3001;
+startServer(JWT_SECRET, SERVER_PORT);

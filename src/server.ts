@@ -8,24 +8,36 @@ import { postMatchMaking } from "./routes/postMatchMaking";
 import { getMatchMaking } from "./routes/getMatchMaking";
 import { postMatchAction } from "./routes/postMatchAction";
 
-export async function startServer(port: number) {
+export async function startServer(jwtSecret: string, port: number) {
   const app: Application = express();
 
   app.use(corsMiddleware);
   app.use(bodyParser.json());
 
-  app.post("/register", postRegister);
+  app.post("/register", postRegister(jwtSecret));
 
-  app.get("/test-authentication", authenticateJWT, (request, response) => {
-    return response.json(
-      users.find((user) => user.userId === request.body.userId)
-    );
-  });
+  app.get(
+    "/test-authentication",
+    authenticateJWT(jwtSecret),
+    (request, response) => {
+      return response.json(
+        users.find((user) => user.userId === request.body.userId)
+      );
+    }
+  );
 
-  app.post("/matchmaking", authenticateJWT, postMatchMaking);
-  app.get("/matchmaking/:matchmakingId", authenticateJWT, getMatchMaking);
+  app.post("/matchmaking", authenticateJWT(jwtSecret), postMatchMaking);
+  app.get(
+    "/matchmaking/:matchmakingId",
+    authenticateJWT(jwtSecret),
+    getMatchMaking
+  );
 
-  app.post("/matches/:matchId/action", authenticateJWT, postMatchAction);
+  app.post(
+    "/matches/:matchId/action",
+    authenticateJWT(jwtSecret),
+    postMatchAction
+  );
 
   app.listen(port);
 }
