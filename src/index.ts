@@ -33,9 +33,9 @@ async function startServer() {
   });
 
   app.post("/matchmaking", authenticateJWT, postMatchMaking);
-  app.get("/matchmaking/{matchmakingId}", authenticateJWT, getMatchMaking);
+  app.get("/matchmaking/:matchmakingId", authenticateJWT, getMatchMaking);
 
-  app.post("/matches/{matchId}/action", authenticateJWT, postMatchAction);
+  app.post("/matches/:matchId/action", authenticateJWT, postMatchAction);
 
   app.listen(SERVER_PORT);
 }
