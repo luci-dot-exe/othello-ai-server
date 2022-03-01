@@ -4,9 +4,10 @@ test(
   "POST Register returns a token",
   createAssertRequest(async (axios) => {
     const response = await axios.post<{ token: string }>(`register`, {
-      username: "PLAYER_1",
+      username: "Player1",
     });
 
+    expect(response.status).toBe(200);
     expect(typeof response.data.token).toBe("string");
   })
 );

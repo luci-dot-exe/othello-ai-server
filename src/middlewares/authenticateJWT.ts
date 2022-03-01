@@ -10,7 +10,7 @@ export const authenticateJWT: (jwtSecret: string) => RequestHandler = (
     if (!authorization) {
       return response
         .status(401)
-        .json({ auth: false, message: "No authorization provided." });
+        .json({ message: "No authorization provided." });
     }
 
     const isJwt = authorization.startsWith("Bearer");
