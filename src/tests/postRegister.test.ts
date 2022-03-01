@@ -1,8 +1,8 @@
-import { assertRequest, assertBadRequest } from "./asserts";
+import { createAssertRequest, createAssertBadRequest } from "./asserts";
 
 test(
   "POST Register returns a token",
-  assertRequest(async (axios) => {
+  createAssertRequest(async (axios) => {
     const response = await axios.post<{ token: string }>(`register`, {
       username: "PLAYER_1",
     });
@@ -13,7 +13,7 @@ test(
 
 test(
   "POST Register with no username returns a bad request",
-  assertBadRequest(
+  createAssertBadRequest(
     async (api) => await api.post("register"),
     "Username field not found"
   )

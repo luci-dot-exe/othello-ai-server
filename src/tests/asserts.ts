@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from "axios";
 import { startServer } from "../server";
 import { randomInRange } from "../utils/randomInRange";
 
-export function assertRequest(
+export function createAssertRequest(
   assertFn: (axios: AxiosInstance) => Promise<void>
 ): () => Promise<void> {
   return async () => {
@@ -19,12 +19,12 @@ export function assertRequest(
   };
 }
 
-function assertApiFailure(
+function createAssertApiFailure(
   request: (api: AxiosInstance) => Promise<void>,
   expectedStatusCode: number,
   expectedMessage: string
 ): () => Promise<void> {
-  return assertRequest(async (api) => {
+  return createAssertRequest(async (api) => {
     await request(api).then(
       function onSuccess() {
         fail();
@@ -46,18 +46,26 @@ function assertApiFailure(
   });
 }
 
-export function assertBadRequest(
+export function createAssertBadRequest(
   request: (api: AxiosInstance) => Promise<void>,
   expectedMessage: string
 ): () => Promise<void> {
   const BAD_REQUEST_STATUS_CODE = 400;
-  return assertApiFailure(request, BAD_REQUEST_STATUS_CODE, expectedMessage);
+  return createAssertApiFailure(
+    request,
+    BAD_REQUEST_STATUS_CODE,
+    expectedMessage
+  );
 }
 
-export function assertUnauthorized(
+export function createAssertUnauthorized(
   request: (api: AxiosInstance) => Promise<void>,
   expectedMessage: string
 ): () => Promise<void> {
   const UNAUTHORIZED_STATUS_CODE = 401;
-  return assertApiFailure(request, UNAUTHORIZED_STATUS_CODE, expectedMessage);
+  return createAssertApiFailure(
+    request,
+    UNAUTHORIZED_STATUS_CODE,
+    expectedMessage
+  );
 }
