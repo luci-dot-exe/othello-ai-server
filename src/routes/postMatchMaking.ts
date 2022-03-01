@@ -1,7 +1,8 @@
 import { RequestHandler } from "express";
-import { matches, playersLookingForMatches, users } from "../database";
+import { matches, Matchmaking, matchmakings, users } from "../database";
 import { internalServerError } from "../middlewares/responses";
 import { randomUUID } from "crypto";
+import { updateElement } from "../utils/updateElement";
 
 export const postMatchMaking: RequestHandler = (request, response) => {
   const userId = request.body.userId as unknown;
@@ -13,40 +14,41 @@ export const postMatchMaking: RequestHandler = (request, response) => {
     );
   }
 
-  const isUserAlreadyOnQueue = playersLookingForMatches.some(
-    (id) => id.userId === userId
+  const user = users.find((user) => user.userId === userId);
+  if (user === undefined) {
+    return internalServerError(response, "No user found with this userId!");
+  }
+
+  const availableMatchmaking = matchmakings.find(
+    (m) => m.status === "SEARCHING_FOR_OPPONENT" && m.player1.userId !== userId
   );
-  if (isUserAlreadyOnQueue) {
-    return response.status(200).send();
-  }
+  if (availableMatchmaking === undefined) {
+    const matchmakingId = randomUUID();
 
-  if (playersLookingForMatches.length == 0) {
-    playersLookingForMatches.push({ userId });
-    return response.status(200).send();
-  }
+    matchmakings.push({
+      status: "SEARCHING_FOR_OPPONENT",
+      matchmakingId,
+      player1: user,
+    });
 
-  const queuedPlayer = playersLookingForMatches.pop();
-
-  if (queuedPlayer === undefined) {
-    return internalServerError(response, "Sanity error: No player queued.");
+    return response.send({ matchmakingId });
   }
 
   const matchId = randomUUID();
 
-  const playerW = users.find((user) => user.userId === queuedPlayer.userId);
-  const playerB = users.find((user) => user.userId === userId);
-
-  if (playerW === undefined || playerB === undefined) {
-    return internalServerError(response, "UserId not found on users.");
-  }
-
   matches.push({
     matchId,
-    playerW,
-    playerB,
-    lastMove: null,
-    playerTurn: "W",
+    phase: "WAITING_FOR_PLAYER_1",
   });
 
-  return response.status(200).send();
+  const updatedMatchmaking: Matchmaking = {
+    ...availableMatchmaking,
+    status: "MATCH_CREATED",
+    player2: user,
+    matchId,
+  };
+
+  updateElement(matchmakings, availableMatchmaking, updatedMatchmaking);
+
+  return response.send({ matchmakingId: updatedMatchmaking.matchmakingId });
 };

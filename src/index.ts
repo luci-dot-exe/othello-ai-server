@@ -6,6 +6,7 @@ import { postRegister } from "./routes/postRegister";
 import { users } from "./database";
 import { postMatchMaking } from "./routes/postMatchMaking";
 import { getMatchMaking } from "./routes/getMatchMaking";
+import { postMatchAction } from "./routes/postMatchAction";
 require("dotenv").config();
 
 const SERVER_PORT = 3001;
@@ -32,7 +33,9 @@ async function startServer() {
   });
 
   app.post("/matchmaking", authenticateJWT, postMatchMaking);
-  app.get("/matchmaking", authenticateJWT, getMatchMaking);
+  app.get("/matchmaking/{matchmakingId}", authenticateJWT, getMatchMaking);
+
+  app.post("/matches/{matchId}/action", authenticateJWT, postMatchAction);
 
   app.listen(SERVER_PORT);
 }

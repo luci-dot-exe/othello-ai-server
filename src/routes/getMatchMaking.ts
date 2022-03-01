@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { matches, playersLookingForMatches } from "../database";
+import { matchmakings } from "../database";
 import { badRequest, internalServerError } from "../middlewares/responses";
 
 export const getMatchMaking: RequestHandler = (request, response) => {
@@ -12,28 +12,40 @@ export const getMatchMaking: RequestHandler = (request, response) => {
     );
   }
 
-  const isUserOnQueue = playersLookingForMatches.some(
-    (id) => id.userId === userId
+  const matchmakingId = request.params.matchmakingId as unknown;
+  if (typeof matchmakingId !== "string") {
+    return internalServerError(
+      response,
+      "Sanity error: No matchmakingId found on params"
+    );
+  }
+
+  const matchmaking = matchmakings.find(
+    (m) => m.matchmakingId === matchmakingId
   );
-  if (isUserOnQueue) {
+  if (matchmaking === undefined) {
+    return badRequest(response, "No matchmaking found");
+  }
+
+  const isUserPlayer1 = matchmaking.player1.userId === userId;
+  const isUserPlayer2 =
+    matchmaking.status === "MATCH_CREATED" &&
+    matchmaking.player2.userId === userId;
+
+  if (!isUserPlayer1 && !isUserPlayer2) {
+    return badRequest(response, "No matchmaking found");
+  }
+
+  if (matchmaking.status === "SEARCHING_FOR_OPPONENT") {
     return response.send({ status: "SEARCHING_OPPONENT" });
   }
 
-  const match = matches.find(
-    (match) =>
-      match.playerW.userId === userId || match.playerB.userId === userId
-  );
-
-  if (match === undefined) {
-    return badRequest(response, "User didnt enter queue.");
-  }
-
-  const opponent =
-    userId === match.playerW.userId ? match.playerB : match.playerW;
+  const { player1, player2 } = matchmaking;
+  const opponent = isUserPlayer1 ? player2 : player1;
 
   return response.send({
     status: "OPPONENT_FOUND",
-    matchId: match.matchId,
+    matchId: matchmaking.matchId,
     opponent,
   });
 };
